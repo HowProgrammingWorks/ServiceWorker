@@ -1,0 +1,10 @@
+html, body {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 9pt;
+}
+h1 {
+  color: #5050C0;
+  font-size: 1.6em;
+  padding: 0 0 6px 0;
+  text-shadow:1px 1px 1px #ccc;
+}
