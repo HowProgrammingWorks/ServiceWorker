@@ -47,47 +47,27 @@ window.addEventListener('appinstalled', event => {
 
 // AJAX API Builder
 
-const ajax = methods => {
-  // params: { method: { get/post:url }, ... }
-  const apiStub = {};
-
-  const createMethod = (apiStub, apiMethod) => {
-    if (apiMethod === 'introspect') {
-      apiStub[apiMethod] = (params, callback) => {
-        apiStub.request(apiMethod, params, (err, data) => {
-          apiStub.init(data);
-          callback(err, data);
-        });
-      };
-      return;
-    }
-    apiStub[apiMethod] = (params, callback) => {
-      apiStub.request(apiMethod, params, callback);
-    };
-  };
-
-  apiStub.request = function(apiMethod, params, callback) {
-    let err = null;
-    const requestParams = this.methods[apiMethod];
-    if (requestParams) {
-      let httpMethod, url;
-      if (requestParams.get) { httpMethod = 'GET'; url = requestParams.get; }
-      if (requestParams.post) { httpMethod = 'POST'; url = requestParams.post; }
-      if (httpMethod) {
-        ajax.request(httpMethod, url, params, true, callback);
-        return;
-      } else err = new Error('DataSource error: HTTP method is not specified');
-    } else err = new Error('DataSource error: AJAX method is not specified');
-    callback(err, null);
-  };
-
-  apiStub.init = methods => {
-    apiStub.methods = methods;
-    for (const apiMethod in apiStub.methods) createMethod(apiStub, apiMethod);
-  };
-
-  apiStub.init(methods);
-  return apiStub;
+const buildAPI = methods => {
+  const api = {};
+  for (const method of methods) {
+    api[method] = (...args) => new Promise((resolve, reject) => {
+      const url = `/api/${method}`;
+      console.log(url, args);
+      fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(args),
+      }).then(res => {
+        const { status } = res;
+        if (status !== 200) {
+          reject(new Error(`Status Code: ${status}`));
+          return;
+        }
+        resolve(res.json());
+      });
+    });
+  }
+  return api;
 };
 
 // Console Emulation
@@ -115,9 +95,7 @@ for (const keyName in KEY_CODE) KEY_NAME[KEY_CODE[keyName]] = keyName;
 let controlKeyboard, panelScroll;
 let controlInput, controlBrowse, controlScroll;
 
-const api = ajax({
-  command: { post: '/api/landing/command.json' }
-});
+const api = buildAPI(['about']);
 
 const pad = (padChar, length) => new Array(length + 1).join(padChar);
 
@@ -363,15 +341,12 @@ const help = [
   '', 'Commands: about, fields, team, links, stack, contacts'
 ];
 
-const exec = line => {
+const exec = async line => {
   const args = line.split(' ');
   const cmd = args.shift();
-  api.command({ cmd, args }, (err, data) => {
-    if (data.response) {
-      print(data.response.concat(help));
-    }
-    commandLoop();
-  });
+  const data = await api[cmd](args);
+  print(data);
+  commandLoop();
 };
 
 window.addEventListener('load', () => {
