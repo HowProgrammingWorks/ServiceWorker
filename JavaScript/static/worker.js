@@ -2,11 +2,13 @@
 
 const files = [
   '/',
-  '/init.js',
-  '/styles.css',
+  '/console.css',
+  '/console.js',
   '/favicon.ico',
   '/favicon.png',
+  '/manifest.json',
   '/metarhia.png',
+  '/metarhia.svg',
 ];
 
 self.addEventListener('install', event => event.waitUntil(
