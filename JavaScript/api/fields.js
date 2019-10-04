@@ -1,0 +1,27 @@
+'use strict';
+
+module.exports = async () => [
+  'Software fields:',
+  '• Highload applications, Scaling and Performance optimization',
+  '• Corporate applications, Databases and Information Systems',
+  '• Systems Architecture and System Integration',
+  '• Interactive applications, games and second screen TV solutions',
+  '• Clusterware and massively parallel distributed cluster/cloud',
+  '• Big-data and big-memory solutions',
+  '• Deep learning, Neural networks, Data analysis',
+  '• Production automation, cybernetics, telemetry',
+  '• Network applications and protocols',
+  '• Mobile, Desktop and Web GUI Applications',
+  '• Embedded systems, Hardware and System Programming',
+  '',
+  'Applied fields:',
+  '• eGovernance Information Systems',
+  '• Health Information Systems',
+  '• Financial analytics and Trading Systems',
+  '• Asset tracking solutions, RFID & GPS navigation',
+  '• RFID (Radio Frequency IDentification)',
+  '• Oil and gas transporting automation and telemetry',
+  '• Social networking and Messaging solutions',
+  '• Document flow automation, Timing and Planning solutions',
+  '• Expert systems and CAD/CAM software',
+];
