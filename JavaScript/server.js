@@ -25,16 +25,12 @@ const serveFile = name => {
 
 const api = new Map();
 
-const receiveArgs = async req => new Promise(resolve => {
-  const body = [];
-  req.on('data', chunk => {
-    body.push(chunk);
-  }).on('end', async () => {
-    const data = body.join('');
-    const args = JSON.parse(data);
-    resolve(args);
-  });
-});
+const receiveArgs = async (req) => {
+  const buffers = [];
+  for await (const chunk of req) buffers.push(chunk);
+  const data = Buffer.concat(buffers).toString();
+  return JSON.parse(data);
+};
 
 const cacheFile = name => {
   const filePath = API_PATH + name;
