@@ -8,7 +8,7 @@ const registerServiceWorker = () => {
     return;
   }
   const { serviceWorker } = navigator;
-  serviceWorker.register('/worker.js').then(registration => {
+  serviceWorker.register('/worker.js').then((registration) => {
     if (registration.installing) {
       console.log('Service worker installing');
       console.log(registration.installing);
@@ -24,7 +24,7 @@ const registerServiceWorker = () => {
       console.log(registration.active);
       return;
     }
-  }).catch(error => {
+  }).catch((error) => {
     console.log('Registration failed');
     console.log(error);
   });
@@ -35,19 +35,19 @@ window.addEventListener('load', () => {
   registerServiceWorker();
 });
 
-window.addEventListener('beforeinstallprompt', event => {
+window.addEventListener('beforeinstallprompt', (event) => {
   console.log('Installing PWA');
   console.dir({ beforeinstallprompt: event });
 });
 
-window.addEventListener('appinstalled', event => {
+window.addEventListener('appinstalled', (event) => {
   console.log('PWA installed');
   console.dir({ appinstalled: event });
 });
 
 // AJAX API Builder
 
-const buildAPI = methods => {
+const buildAPI = (methods) => {
   const api = {};
   for (const method of methods) {
     api[method] = (...args) => new Promise((resolve, reject) => {
@@ -57,7 +57,7 @@ const buildAPI = methods => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(args),
-      }).then(res => {
+      }).then((res) => {
         const { status } = res;
         if (status !== 200) {
           reject(new Error(`Status Code: ${status}`));
@@ -143,7 +143,7 @@ const showKeyboard = () => {
   controlBrowse.style.bottom = controlKeyboard.offsetHeight + 'px';
 };
 
-const inputSetValue = value => {
+const inputSetValue = (value) => {
   controlInput.inputValue = value;
   if (controlInput.inputType === 'masked') {
     value = pad('*', value.length);
@@ -177,7 +177,7 @@ const clear = () => {
   }
 };
 
-const print = s => {
+const print = (s) => {
   const list = Array.isArray(s);
   let line = list ? s.shift() : s;
   if (!line) line = '';
@@ -214,7 +214,7 @@ const enterKey = () => {
   });
 };
 
-const format = obj => {
+const format = (obj) => {
   let res = '<table><tr><th>Parameter</th><th>Value</th></tr>';
   let key, val;
   for (key in obj) {
@@ -261,7 +261,7 @@ const inputKeyboardEvents = {
   }
 };
 
-const makeKeyboardClick = char => e => {
+const makeKeyboardClick = (char) => (e) => {
   char = e.target.inputChar;
   if (char === '_') char = ' ';
   let keyName = 'KEY';
@@ -305,7 +305,7 @@ const initKeyboard = () => {
   controlBrowse.style.bottom = controlKeyboard.offsetHeight + 'px';
 };
 
-document.onkeydown = event => {
+document.onkeydown = (event) => {
   let keyName, fn;
   if (controlInput.inputActive) {
     keyName = KEY_NAME[event.keyCode];
@@ -317,7 +317,7 @@ document.onkeydown = event => {
   }
 };
 
-document.onkeypress = event => {
+document.onkeypress = (event) => {
   if (controlInput.inputActive) {
     const fn = inputKeyboardEvents['KEY'];
     const char = String.fromCharCode(event.keyCode);
@@ -341,7 +341,7 @@ const help = [
   '', 'Commands: about, fields, team, links, stack, contacts'
 ];
 
-const exec = async line => {
+const exec = async (line) => {
   const args = line.split(' ');
   const cmd = args.shift();
   const data = await api[cmd](args);

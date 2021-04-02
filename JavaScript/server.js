@@ -17,7 +17,7 @@ const MIME_TYPES = {
   svg: 'image/svg+xml',
 };
 
-const serveFile = name => {
+const serveFile = (name) => {
   const filePath = path.join(STATIC_PATH, name);
   if (!filePath.startsWith(STATIC_PATH)) return null;
   return fs.createReadStream(filePath);
@@ -32,7 +32,7 @@ const receiveArgs = async (req) => {
   return JSON.parse(data);
 };
 
-const cacheFile = name => {
+const cacheFile = (name) => {
   const filePath = API_PATH + name;
   const key = path.basename(filePath, '.js');
   try {
@@ -49,14 +49,14 @@ const cacheFile = name => {
   }
 };
 
-const cacheFolder = path => {
+const cacheFolder = (path) => {
   fs.readdir(path, (err, files) => {
     if (err) return;
     files.forEach(cacheFile);
   });
 };
 
-const watch = path => {
+const watch = (path) => {
   fs.watch(path, (event, file) => {
     cacheFile(file);
   });
