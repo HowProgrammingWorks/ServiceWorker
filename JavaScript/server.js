@@ -4,23 +4,37 @@ const fs = require('fs');
 const http = require('http');
 const path = require('path');
 
+const PORT = 8000;
+
 const STATIC_PATH = path.join(process.cwd(), './static');
 const API_PATH = './api/';
 
 const MIME_TYPES = {
+  default: 'application/octet-stream',
   html: 'text/html; charset=UTF-8',
   js: 'application/javascript; charset=UTF-8',
+  json: 'application/json',
   css: 'text/css',
   png: 'image/png',
+  jpg: 'image/jpg',
+  gif: 'image/gif',
   ico: 'image/x-icon',
-  json: 'application/json',
   svg: 'image/svg+xml',
 };
 
-const serveFile = (name) => {
-  const filePath = path.join(STATIC_PATH, name);
-  if (!filePath.startsWith(STATIC_PATH)) return null;
-  return fs.createReadStream(filePath);
+const toBool = [() => true, () => false];
+
+const prepareFile = async (url) => {
+  const paths = [STATIC_PATH, url];
+  if (url.endsWith('/')) paths.push('index.html');
+  const filePath = path.join(...paths);
+  const pathTraversal = !filePath.startsWith(STATIC_PATH);
+  const exists = await fs.promises.access(filePath).then(...toBool);
+  const found = !pathTraversal && exists;
+  const streamPath = found ? filePath : STATIC_PATH + '/404.html';
+  const ext = path.extname(streamPath).substring(1).toLowerCase();
+  const stream = fs.createReadStream(streamPath);
+  return { found, ext, stream };
 };
 
 const api = new Map();
@@ -38,21 +52,20 @@ const cacheFile = (name) => {
   try {
     const libPath = require.resolve(filePath);
     delete require.cache[libPath];
-  } catch (e) {
+  } catch {
     return;
   }
   try {
     const method = require(filePath);
     api.set(key, method);
-  } catch (e) {
+  } catch {
     api.delete(name);
   }
 };
 
 const cacheFolder = (path) => {
   fs.readdir(path, (err, files) => {
-    if (err) return;
-    files.forEach(cacheFile);
+    if (!err) files.forEach(cacheFile);
   });
 };
 
@@ -71,8 +84,7 @@ const httpError = (res, status, message) => {
 };
 
 http.createServer(async (req, res) => {
-  const url = req.url === '/' ? '/index.html' : req.url;
-  const [first, second] = url.substring(1).split('/');
+  const [first, second] = req.url.substring(1).split('/');
   if (first === 'api') {
     const method = api.get(second);
     const args = await receiveArgs(req);
@@ -88,9 +100,13 @@ http.createServer(async (req, res) => {
       httpError(res, 500, 'Server error');
     }
   } else {
-    const fileExt = path.extname(url).substring(1);
-    res.writeHead(200, { 'Content-Type': MIME_TYPES[fileExt] });
-    const stream = serveFile(url);
-    if (stream) stream.pipe(res);
+    const file = await prepareFile(req.url);
+    const statusCode = file.found ? 200 : 404;
+    const mimeType = MIME_TYPES[file.ext] || MIME_TYPES.default;
+    res.writeHead(statusCode, { 'Content-Type': mimeType });
+    file.stream.pipe(res);
+    console.log(`${req.method} ${req.url} ${statusCode}`);
   }
-}).listen(8000);
+}).listen(PORT);
+
+console.log(`Server running at http://127.0.0.1:${PORT}/`);
